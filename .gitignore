@@ -1,0 +1,11 @@
+# Eclipse workspace state is machine-local; project settings remain tracked.
+.metadata/
+Debug/
+Release/
+build/
+cmake-build-*/
+*.elf
+*.map
+*.list
+*.o
+*.d

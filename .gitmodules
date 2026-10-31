@@ -1,0 +1,9 @@
+[submodule "third-party/FreeRTOS-Kernel"]
+	path = third-party/FreeRTOS-Kernel
+	url = https://github.com/FreeRTOS/FreeRTOS-Kernel.git
+[submodule "third-party/nanoMODBUS"]
+	path = third-party/nanoMODBUS
+	url = https://github.com/debevv/nanoMODBUS.git
+[submodule "third-party/manipulator_kinematics"]
+	path = third-party/manipulator_kinematics
+	url = https://github.com/chikiryauxgod/manipulator_kinematics.git
