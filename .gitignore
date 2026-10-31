@@ -1,11 +1,46 @@
-# Eclipse workspace state is machine-local; project settings remain tracked.
+# CubeIDE: shared project and compiler settings remain tracked.
 .metadata/
-Debug/
-Release/
-build/
-cmake-build-*/
+.settings/com.st.stm32cube.ide.mcu.sfrview.prefs
+.settings/stm32cubeide.project.prefs
+*.launch
+
+# Build trees and compiler output.
+/Debug/
+/Release/
+/build/
+/build-*/
+/cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+Testing/
+compile_commands.json
 *.elf
+*.bin
+*.hex
+*.srec
 *.map
 *.list
 *.o
 *.d
+*.a
+*.so
+*.su
+*.cyclo
+
+# Python environments, caches and coverage.
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Local validation reports and editor files.
+/reports/
+/docs/roadmap.md
+*.swp
+*.swo
+*~
+.DS_Store
