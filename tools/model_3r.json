@@ -1,0 +1,7 @@
+{
+  "joints": [
+    {"a": 0, "alpha": 1.57079632679, "d_offset": 0.1, "theta_offset": 0, "min": -3.14159265, "max": 3.14159265},
+    {"a": 0.3, "alpha": 0, "d_offset": 0, "theta_offset": 0, "min": -3.14159265, "max": 3.14159265},
+    {"a": 0.2, "alpha": 0, "d_offset": 0, "theta_offset": 0, "min": -3.14159265, "max": 3.14159265}
+  ]
+}

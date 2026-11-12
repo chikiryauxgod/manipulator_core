@@ -45,8 +45,13 @@ _Min_Stack_Size = 0x400; /* required amount of stack */
 MEMORY
 {
   RAM    (xrw)    : ORIGIN = 0x20000000,   LENGTH = 64K
-  FLASH    (rx)    : ORIGIN = 0x8000000,   LENGTH = 256K
+  FLASH    (rx)    : ORIGIN = 0x8000000,   LENGTH = 64K
 }
+
+/* 0x08010000..0x0801ffff (sector 4) and 0x08020000..0x0803ffff
+ * (sector 5) belong exclusively to ConfigurationFlash. They are not loadable sections.
+ * Firmware growth beyond sector 3 must fail linking, never overwrite settings.
+ */
 
 /* Sections */
 SECTIONS
