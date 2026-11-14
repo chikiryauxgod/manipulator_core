@@ -79,6 +79,18 @@ if(Python3_Interpreter_FOUND)
     execute_process(COMMAND ${Python3_EXECUTABLE} -c "import pytest"
         RESULT_VARIABLE pytest_unavailable OUTPUT_QUIET ERROR_QUIET)
     if(pytest_unavailable EQUAL 0)
+        if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND TARGET manipulator_modbus)
+            add_executable(virtual_modbus_server tests/integration/virtual/server.cpp)
+            target_link_libraries(virtual_modbus_server PRIVATE manipulator_modbus)
+            target_compile_options(virtual_modbus_server PRIVATE -Wall -Wextra -Werror)
+            add_test(NAME virtual_serial_pytest
+                COMMAND ${CMAKE_COMMAND} -E env
+                    PTY_SERVER=$<TARGET_FILE:virtual_modbus_server>
+                    ${Python3_EXECUTABLE} -m pytest
+                    ${CMAKE_CURRENT_SOURCE_DIR}/tests/integration/virtual -q)
+            set_tests_properties(virtual_serial_pytest PROPERTIES TIMEOUT 60)
+        endif()
+
         add_test(NAME kinematics_stdio_pytest
             COMMAND ${Python3_EXECUTABLE} -m pytest
                 ${KINEMATICS_PATH}/tests/integration/test_forward_stream.py
