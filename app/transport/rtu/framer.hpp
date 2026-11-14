@@ -40,11 +40,17 @@ public:
         }
     }
 
-    void silence(uint32_t now)
+    // Return the remaining delay if a compare interrupt arrived before t3.5.
+    uint32_t silence(uint32_t now)
     {
-        if (receiving_ && uint32_t(now - last_) >= completion_delay()) {
+        if (receiving_) {
+            const uint32_t elapsed = now - last_;
+            if (elapsed < completion_delay()) {
+                return completion_delay() - elapsed;
+            }
             finish();
         }
+        return 0;
     }
 
     bool pop(uint8_t* output, uint16_t& size)

@@ -35,7 +35,11 @@ void FreeRtosRtuTransport::silence(void* context)
 {
     auto& self = *static_cast<FreeRtosRtuTransport*>(context);
     ++self.timer_interrupts_;
-    self.framer_.silence(self.timer_.now());
+    const uint32_t remaining = self.framer_.silence(self.timer_.now());
+    if (remaining != 0) {
+        self.timer_.arm_after(remaining);
+        return;
+    }
     BaseType_t woken = pdFALSE;
     vTaskNotifyGiveFromISR(self.owner_, &woken);
     portYIELD_FROM_ISR(woken);

@@ -66,6 +66,8 @@ def main():
                 f'sysbus LoadELF @{args.elf.resolve()}',
                 f'emulation CreateUartPtyTerminal "uart" {json.dumps(str(port))}',
                 'connector Connect sysbus.usart2 uart',
+                # Keep UART byte delivery below the 95 us character interval.
+                'emulation SetGlobalQuantum "0.00001"',
                 'start', '',
             ]))
             with log_path.open('w') as log:
