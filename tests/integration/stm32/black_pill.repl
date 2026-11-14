@@ -15,3 +15,7 @@ timer1:
 
 timer2:
     frequency: 84000000
+
+// USART2 is on APB1: HCLK / 2, matching SystemClock_Config().
+usart2:
+    frequency: 42000000
