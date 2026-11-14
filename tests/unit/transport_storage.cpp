@@ -18,10 +18,11 @@ int main()
     for (unsigned i = 0; i < 8; ++i) {
         framer.byte(i, i * 100);
     }
-    framer.silence(2449);
+    CHECK(framer.silence(2449) == 1);
     CHECK(!framer.pop(data, size));
-    framer.silence(2450);
+    CHECK(framer.silence(2450) == 0);
     CHECK(framer.pop(data, size) && size == 8 && data[7] == 7);
+    CHECK(framer.silence(2451) == 0);
 
     // A gap between t1.5 and t3.5 invalidates the whole frame.
     framer.byte(1, 3000);

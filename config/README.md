@@ -1,6 +1,6 @@
 # Конфигурация и сборка
 
-Здесь лежат настройки FreeRTOS, численного профиля кинематики и режима прошивки. Проект STM32CubeIDE открывается из корня репозитория, где находятся `.project`, `.cproject` и `manipulator_core.ioc`; CMake используется для сборки на ПК.
+Здесь лежат настройки FreeRTOS, численного профиля кинематики и режима прошивки. Проект STM32CubeIDE открывается из корня репозитория, где находятся `.project`, `.cproject` и `manipulator_core.ioc`; CMake используется для сборки на ПК и [ARM-прошивки](../tests/integration/stm32/README.md).
 
 ```sh
 git submodule update --init --recursive
