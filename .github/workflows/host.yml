@@ -31,5 +31,81 @@ jobs:
           -DK_BUILD_UNIT_TESTS=ON
       - name: Build
         run: cmake --build build/ci --parallel 2
-      - name: Test without a board
-        run: ctest --test-dir build/ci --output-on-failure -LE hardware
+      - name: Kinematics unit tests (Google Test)
+        run: ctest --test-dir build/ci/kinematics --output-on-failure --output-junit unit.xml
+      - name: Kinematics stdin and stdout tests (pytest)
+        run: ctest --test-dir build/ci -R '^kinematics_stdio_pytest$' -V --output-junit stdio.xml
+      - name: Virtual COM tests (pytest and PTY)
+        run: ctest --test-dir build/ci -R '^virtual_serial_pytest$' -V --output-junit virtual-com.xml
+      - name: Application and FreeRTOS tests
+        run: >-
+          ctest --test-dir build/ci --output-on-failure
+          -R '^(application|protocol|modbus|transport_storage|storage_protocol|persistent_store|rtos_layer)'
+          -LE hardware --output-junit application.xml
+      - name: Show FK and IK example
+        run: |
+          ./build/ci/kinematics_stdio_example < examples/kinematics_stdio.stdin > build/ci/example.txt
+          cat build/ci/example.txt
+          {
+            echo '### FK and IK example'
+            echo '```text'
+            cat build/ci/example.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Save test results
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: host-test-results
+          path: |
+            build/ci/*.xml
+            build/ci/kinematics/unit.xml
+            build/ci/Testing/Temporary/LastTest.log
+            build/ci/kinematics/Testing/Temporary/LastTest.log
+            build/ci/example.txt
+
+  stm32:
+    name: STM32 firmware in Renode
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          submodules: recursive
+      - name: Install ARM tools and Python
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-arm-none-eabi libnewlib-arm-none-eabi libstdc++-arm-none-eabi-newlib python3-venv
+          python3 -m venv .venv
+          .venv/bin/python -m pip install -r tools/requirements.txt
+      - name: Install Renode 1.17.0
+        run: |
+          curl -fL --retry 3 https://github.com/renode/renode/releases/download/v1.17.0/renode-1.17.0.linux-portable.tar.gz -o /tmp/renode.tar.gz
+          echo '4ba7c68b59e2447f188ef4b4b112fcccd2802582c460beedceb63b84e5605a5f  /tmp/renode.tar.gz' | sha256sum -c -
+          mkdir -p /tmp/renode
+          tar -xzf /tmp/renode.tar.gz -C /tmp/renode
+      - name: Build STM32F401 firmware
+        run: |
+          cmake -S firmware -B build/stm32 -DCMAKE_TOOLCHAIN_FILE="$PWD/cmake/arm-none-eabi.cmake" -DCMAKE_BUILD_TYPE=Release
+          cmake --build build/stm32 --parallel 2
+      - name: Run serial integration tests on STM32 firmware
+        run: >-
+          .venv/bin/python tests/integration/stm32/run.py
+          --renode /tmp/renode/renode_1.17.0-portable/renode
+      - name: Show STM32 session
+        run: |
+          {
+            echo '### STM32 firmware: configure, solve, read and ACK'
+            echo '```text'
+            cat build/renode/example.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Save STM32 results
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: stm32-test-results
+          path: |
+            build/stm32/manipulator_core.elf
+            build/stm32/manipulator_core.map
+            build/renode/

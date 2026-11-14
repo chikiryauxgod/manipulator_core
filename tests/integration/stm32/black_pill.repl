@@ -1,0 +1,17 @@
+// STM32F401 memory and clock profile on Renode's STM32F4 peripheral models.
+using "platforms/cpus/stm32f4.repl"
+
+sram:
+    size: 0x10000
+
+flash:
+    size: 0x40000
+
+nvic:
+    systickFrequency: 84000000
+
+timer1:
+    frequency: 84000000
+
+timer2:
+    frequency: 84000000
