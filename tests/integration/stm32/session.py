@@ -1,8 +1,10 @@
 """Queue complete host writes while Renode is paused, then run UART timing."""
 import argparse
+import re
 import runpy
 import socket
 import sys
+import uuid
 from unittest.mock import patch
 
 import serial
@@ -10,18 +12,23 @@ import serial
 
 class EmulatorSerial(serial.Serial):
     monitor_port = None
-    prompt = b'(blackpill) '
 
     def __init__(self, *args, **kwargs):
         self.monitor = None
         super().__init__(*args, **kwargs)
         self.monitor = socket.create_connection(('127.0.0.1', self.monitor_port), timeout=5)
         self.monitor.settimeout(5)
-        self._prompts(1)
+        self._commands(['mach set "blackpill"'])
 
-    def _prompts(self, count):
+    def _commands(self, commands):
+        # A new monitor connection can replay previous terminal output. A unique
+        # output line acknowledges this batch without counting stale prompts.
+        marker = uuid.uuid4().hex
+        commands = [*commands, f'echo "{marker}"']
+        self.monitor.sendall(('\n'.join(commands) + '\n').encode())
         data = bytearray()
-        while data.count(self.prompt) < count:
+        pattern = rb'[\r\n]' + marker.encode() + rb'[\r\n]'
+        while not re.search(pattern, data):
             block = self.monitor.recv(65536)
             if not block:
                 raise ConnectionError('Renode monitor disconnected')
@@ -36,8 +43,7 @@ class EmulatorSerial(serial.Serial):
         commands = ['pause']
         commands.extend(f'sysbus.usart2 WriteChar {byte}' for byte in packet)
         commands.append('start')
-        self.monitor.sendall(('\n'.join(commands) + '\n').encode())
-        self._prompts(len(commands))
+        self._commands(commands)
         return len(packet)
 
     def close(self):
