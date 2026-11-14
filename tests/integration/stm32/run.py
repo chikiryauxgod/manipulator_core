@@ -5,6 +5,7 @@ import json
 import os
 from pathlib import Path
 import signal
+import socket
 import subprocess
 import sys
 import tempfile
@@ -58,6 +59,11 @@ def main():
         with tempfile.TemporaryDirectory(prefix='blackpill-') as directory:
             work = Path(directory)
             port = work / 'usart2'
+            with socket.socket() as listener:
+                listener.bind(('127.0.0.1', 0))
+                monitor_port = listener.getsockname()[1]
+            session = [sys.executable, str(Path(__file__).with_name('session.py')),
+                       '--monitor', str(monitor_port)]
             script = work / 'black_pill.resc'
             platform = Path(__file__).with_name('black_pill.repl').resolve()
             script.write_text('\n'.join([
@@ -66,24 +72,22 @@ def main():
                 f'sysbus LoadELF @{args.elf.resolve()}',
                 f'emulation CreateUartPtyTerminal "uart" {json.dumps(str(port))}',
                 'connector Connect sysbus.usart2 uart',
-                # Keep UART byte delivery below the 95 us character interval.
-                'emulation SetGlobalQuantum "0.00001"',
                 'start', '',
             ]))
             with log_path.open('w') as log:
                 process = subprocess.Popen(
-                    [args.renode, '--disable-gui', '--plain', '-P', '-1', str(script)],
+                    [args.renode, '--disable-gui', '--plain', '-P', str(monitor_port), str(script)],
                     stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
                 try:
                     wait_ready(process, port)
                     print('STM32 firmware ready: Cortex-M4, FreeRTOS, USART2.', flush=True)
                     subprocess.run([
-                        sys.executable, str(ROOT / 'tests/integration/hardware/test_black_pill.py'),
+                        *session, str(ROOT / 'tests/integration/hardware/test_black_pill.py'),
                         '--port', str(port), '--no-parity',
                         '--output', str(args.output.resolve() / 'tests.json'),
                     ], check=True, timeout=180)
                     result = subprocess.run([
-                        sys.executable, str(ROOT / 'examples/black_pill_session.py'),
+                        *session, str(ROOT / 'examples/black_pill_session.py'),
                         '--port', str(port), '--no-parity',
                     ], check=True, text=True, stdout=subprocess.PIPE, timeout=60)
                     (args.output / 'example.txt').write_text(result.stdout)
