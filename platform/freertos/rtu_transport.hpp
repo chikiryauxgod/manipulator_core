@@ -45,4 +45,4 @@ private:
     TaskHandle_t owner_ = nullptr;
 };
 
-}
+} // namespace manipulator

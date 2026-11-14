@@ -3,8 +3,7 @@
  */
 #include "stm32f4xx_hal.h"
 
-HAL_StatusTypeDef HAL_InitTick(uint32_t priority)
-{
+HAL_StatusTypeDef HAL_InitTick(uint32_t priority) {
     RCC_ClkInitTypeDef clocks;
     uint32_t latency;
     uint32_t timer_clock = HAL_RCC_GetPCLK2Freq();
@@ -45,20 +44,16 @@ HAL_StatusTypeDef HAL_InitTick(uint32_t priority)
     return HAL_OK;
 }
 
-void HAL_SuspendTick(void)
-{
+void HAL_SuspendTick(void) {
     TIM1->DIER &= ~TIM_DIER_UIE;
 }
 
-void HAL_ResumeTick(void)
-{
+void HAL_ResumeTick(void) {
     TIM1->DIER |= TIM_DIER_UIE;
 }
 
-void TIM1_UP_TIM10_IRQHandler(void)
-{
-    if ((TIM1->SR & TIM_SR_UIF) != 0U &&
-        (TIM1->DIER & TIM_DIER_UIE) != 0U) {
+void TIM1_UP_TIM10_IRQHandler(void) {
+    if ((TIM1->SR & TIM_SR_UIF) != 0U && (TIM1->DIER & TIM_DIER_UIE) != 0U) {
         /* Writing zero clears UIF; ones leave other status flags unchanged. */
         TIM1->SR = ~TIM_SR_UIF;
         HAL_IncTick();

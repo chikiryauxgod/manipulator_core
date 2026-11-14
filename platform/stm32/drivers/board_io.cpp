@@ -4,13 +4,23 @@
 
 namespace manipulator::stm32::drivers {
 
-uint32_t milliseconds() { return HAL_GetTick(); }
-void delay_ms(uint32_t duration) { HAL_Delay(duration); }
-void disable_interrupts() { __disable_irq(); }
-void idle_instruction() { __NOP(); }
+uint32_t milliseconds() {
+    return HAL_GetTick();
+}
 
-void StatusLed::initialize()
-{
+void delay_ms(uint32_t duration) {
+    HAL_Delay(duration);
+}
+
+void disable_interrupts() {
+    __disable_irq();
+}
+
+void idle_instruction() {
+    __NOP();
+}
+
+void StatusLed::initialize() {
     __HAL_RCC_GPIOC_CLK_ENABLE();
     set(false);
     GPIO_InitTypeDef gpio{};
@@ -21,9 +31,8 @@ void StatusLed::initialize()
     HAL_GPIO_Init(GPIOC, &gpio);
 }
 
-void StatusLed::set(bool on)
-{
+void StatusLed::set(bool on) {
     HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, on ? GPIO_PIN_RESET : GPIO_PIN_SET);
 }
 
-}
+} // namespace manipulator::stm32::drivers

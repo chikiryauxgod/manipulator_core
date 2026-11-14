@@ -22,17 +22,17 @@ def wait_ready(process, port, timeout=30):
     deadline = time.monotonic() + timeout
     while time.monotonic() < deadline:
         if process.poll() is not None:
-            raise RuntimeError(f'Renode exited with code {process.returncode}')
+            raise RuntimeError(f"Renode exited with code {process.returncode}")
         if port.exists():
             try:
                 # PTYs carry bytes only; they cannot verify physical parity bits.
-                with serial.Serial(str(port), 115200, timeout=.5, write_timeout=1) as stream:
-                    if Client(stream, 1).status()['version'] == 1:
+                with serial.Serial(str(port), 115200, timeout=0.5, write_timeout=1) as stream:
+                    if Client(stream, 1).status()["version"] == 1:
                         return
             except (OSError, ValueError, TimeoutError, serial.SerialException):
                 pass
-        time.sleep(.1)
-    raise TimeoutError('STM32 firmware did not respond over USART2')
+        time.sleep(0.1)
+    raise TimeoutError("STM32 firmware did not respond over USART2")
 
 
 def stop(process):
@@ -47,60 +47,89 @@ def stop(process):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--renode', default='renode')
-    parser.add_argument('--elf', type=Path, default=ROOT / 'build/stm32/manipulator_core.elf')
-    parser.add_argument('--output', type=Path, default=ROOT / 'build/renode')
+    parser.add_argument("--renode", default="renode")
+    parser.add_argument("--elf", type=Path, default=ROOT / "build/stm32/manipulator_core.elf")
+    parser.add_argument("--output", type=Path, default=ROOT / "build/renode")
     args = parser.parse_args()
     if not args.elf.is_file():
-        parser.error(f'Firmware not found: {args.elf}')
+        parser.error(f"Firmware not found: {args.elf}")
     args.output.mkdir(parents=True, exist_ok=True)
-    log_path = args.output / 'renode.log'
+    log_path = args.output / "renode.log"
     try:
-        with tempfile.TemporaryDirectory(prefix='blackpill-') as directory:
+        with tempfile.TemporaryDirectory(prefix="blackpill-") as directory:
             work = Path(directory)
-            port = work / 'usart2'
+            port = work / "usart2"
             with socket.socket() as listener:
-                listener.bind(('127.0.0.1', 0))
+                listener.bind(("127.0.0.1", 0))
                 monitor_port = listener.getsockname()[1]
-            session = [sys.executable, str(Path(__file__).with_name('session.py')),
-                       '--monitor', str(monitor_port)]
-            script = work / 'black_pill.resc'
-            platform = Path(__file__).with_name('black_pill.repl').resolve()
-            script.write_text('\n'.join([
-                'mach create "blackpill"',
-                f'machine LoadPlatformDescription @{platform}',
-                f'sysbus LoadELF @{args.elf.resolve()}',
-                f'emulation CreateUartPtyTerminal "uart" {json.dumps(str(port))}',
-                'connector Connect sysbus.usart2 uart',
-                'start', '',
-            ]))
-            with log_path.open('w') as log:
+            session = [
+                sys.executable,
+                str(Path(__file__).with_name("session.py")),
+                "--monitor",
+                str(monitor_port),
+            ]
+            script = work / "black_pill.resc"
+            platform = Path(__file__).with_name("black_pill.repl").resolve()
+            script.write_text(
+                "\n".join(
+                    [
+                        'mach create "blackpill"',
+                        f"machine LoadPlatformDescription @{platform}",
+                        f"sysbus LoadELF @{args.elf.resolve()}",
+                        f'emulation CreateUartPtyTerminal "uart" {json.dumps(str(port))}',
+                        "connector Connect sysbus.usart2 uart",
+                        "start",
+                        "",
+                    ]
+                )
+            )
+            with log_path.open("w") as log:
                 process = subprocess.Popen(
-                    [args.renode, '--disable-gui', '--plain', '-P', str(monitor_port), str(script)],
-                    stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
+                    [args.renode, "--disable-gui", "--plain", "-P", str(monitor_port), str(script)],
+                    stdout=log,
+                    stderr=subprocess.STDOUT,
+                    start_new_session=True,
+                )
                 try:
                     wait_ready(process, port)
-                    print('STM32 firmware ready: Cortex-M4, FreeRTOS, USART2.', flush=True)
-                    subprocess.run([
-                        *session, str(ROOT / 'tests/integration/hardware/test_black_pill.py'),
-                        '--port', str(port), '--no-parity',
-                        '--output', str(args.output.resolve() / 'tests.json'),
-                    ], check=True, timeout=180)
-                    result = subprocess.run([
-                        *session, str(ROOT / 'examples/black_pill_session.py'),
-                        '--port', str(port), '--no-parity',
-                    ], check=True, text=True, stdout=subprocess.PIPE, timeout=60)
-                    (args.output / 'example.txt').write_text(result.stdout)
-                    print(result.stdout, end='')
+                    print("STM32 firmware ready: Cortex-M4, FreeRTOS, USART2.", flush=True)
+                    subprocess.run(
+                        [
+                            *session,
+                            str(ROOT / "tests/integration/hardware/test_black_pill.py"),
+                            "--port",
+                            str(port),
+                            "--no-parity",
+                            "--output",
+                            str(args.output.resolve() / "tests.json"),
+                        ],
+                        check=True,
+                        timeout=180,
+                    )
+                    result = subprocess.run(
+                        [
+                            *session,
+                            str(ROOT / "examples/black_pill_session.py"),
+                            "--port",
+                            str(port),
+                            "--no-parity",
+                        ],
+                        check=True,
+                        text=True,
+                        stdout=subprocess.PIPE,
+                        timeout=60,
+                    )
+                    (args.output / "example.txt").write_text(result.stdout)
+                    print(result.stdout, end="")
                     if process.poll() is not None:
-                        raise RuntimeError('Renode stopped during the tests')
+                        raise RuntimeError("Renode stopped during the tests")
                 finally:
                     stop(process)
     except (OSError, RuntimeError, TimeoutError, subprocess.SubprocessError) as error:
-        print(f'STM32 test failed: {error}\nRenode log: {log_path}', file=sys.stderr)
+        print(f"STM32 test failed: {error}\nRenode log: {log_path}", file=sys.stderr)
         return 1
     return 0
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main())

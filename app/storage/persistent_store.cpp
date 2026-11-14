@@ -2,19 +2,17 @@
 
 namespace manipulator {
 
-bool PersistentConfigurationStore::newer(uint32_t a, uint32_t b)
-{
+bool PersistentConfigurationStore::newer(uint32_t a, uint32_t b) {
     return a != b && uint32_t(a - b) < 0x80000000U;
 }
 
-bool PersistentConfigurationStore::load(SavedConfiguration& config)
-{
+bool PersistentConfigurationStore::load(SavedConfiguration& config) {
     ConfigurationRecord::Data first{}, second{};
     SavedConfiguration a, b;
-    const bool valid_a = storage_.read(0, first.data(), first.size()) &&
-                         ConfigurationRecord::decode(first, a);
-    const bool valid_b = storage_.read(1, second.data(), second.size()) &&
-                         ConfigurationRecord::decode(second, b);
+    const bool valid_a =
+        storage_.read(0, first.data(), first.size()) && ConfigurationRecord::decode(first, a);
+    const bool valid_b =
+        storage_.read(1, second.data(), second.size()) && ConfigurationRecord::decode(second, b);
     if (!valid_a && !valid_b) {
         return false;
     }
@@ -23,8 +21,7 @@ bool PersistentConfigurationStore::load(SavedConfiguration& config)
     return true;
 }
 
-bool PersistentConfigurationStore::save(const SavedConfiguration& config)
-{
+bool PersistentConfigurationStore::save(const SavedConfiguration& config) {
     ConfigurationRecord::Data first{}, second{};
     // A read error is different from an erased slot: never erase on uncertain state.
     if (!storage_.read(0, first.data(), first.size()) ||
@@ -49,4 +46,4 @@ bool PersistentConfigurationStore::save(const SavedConfiguration& config)
     return storage_.read(target, verified.data(), verified.size()) && verified == data;
 }
 
-}
+} // namespace manipulator

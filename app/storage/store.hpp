@@ -28,8 +28,7 @@ struct ConfigurationRecord {
     static constexpr std::size_t words = 176;
     using Data = std::array<uint32_t, words>;
 
-    static uint32_t crc(const Data& data)
-    {
+    static uint32_t crc(const Data& data) {
         uint32_t result = 0xffffffffU;
         for (std::size_t i = 0; i < words - 2; ++i) {
             for (unsigned byte = 0; byte < 4; ++byte) {
@@ -42,8 +41,7 @@ struct ConfigurationRecord {
         return ~result;
     }
 
-    static std::array<uint32_t, 7> solver_parameters()
-    {
+    static std::array<uint32_t, 7> solver_parameters() {
         std::array<uint32_t, 7> result{IkDefaults::iterations, IkDefaults::backtracking};
         const float values[] = {IkDefaults::tolerance, IkDefaults::length_scale,
                                 IkDefaults::damping, IkDefaults::joint_scale, IkDefaults::max_step};
@@ -53,8 +51,7 @@ struct ConfigurationRecord {
         return result;
     }
 
-    static Data encode(const SavedConfiguration& config, uint32_t sequence)
-    {
+    static Data encode(const SavedConfiguration& config, uint32_t sequence) {
         Data data{};
         data[0] = magic;
         data[1] = 1;
@@ -74,11 +71,10 @@ struct ConfigurationRecord {
         return data;
     }
 
-    static bool decode(const Data& data, SavedConfiguration& config)
-    {
+    static bool decode(const Data& data, SavedConfiguration& config) {
         if (data[0] != magic || data[1] != 1 || data[words - 1] != 0 ||
-            data[words - 2] != crc(data) || data[3] < 1 || data[3] > 247 ||
-            data[4] < 38400 || data[4] > 115200 || data[5] > 1) {
+            data[words - 2] != crc(data) || data[3] < 1 || data[3] > 247 || data[4] < 38400 ||
+            data[4] > 115200 || data[5] > 1) {
             return false;
         }
 
@@ -104,4 +100,4 @@ struct ConfigurationRecord {
     }
 };
 
-}
+} // namespace manipulator

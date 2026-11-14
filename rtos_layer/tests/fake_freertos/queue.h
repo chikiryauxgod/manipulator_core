@@ -2,13 +2,16 @@
 
 #include "FreeRTOS.h"
 #include <cstring>
-struct StaticQueue_t { unsigned capacity, size, head, used;
+
+struct StaticQueue_t {
+    unsigned capacity, size, head, used;
     uint8_t* storage;
 };
 
-using QueueHandle_t = StaticQueue_t * ;
-inline QueueHandle_t xQueueCreateStatic(unsigned n, unsigned s, uint8_t* b, StaticQueue_t * q) {
-    * q = {n, s, 0, 0, b};
+using QueueHandle_t = StaticQueue_t*;
+
+inline QueueHandle_t xQueueCreateStatic(unsigned n, unsigned s, uint8_t* b, StaticQueue_t* q) {
+    *q = {n, s, 0, 0, b};
 
     return q;
 }
@@ -36,15 +39,17 @@ inline int xQueueReceive(QueueHandle_t q, void* p, TickType_t t) {
     return 1;
 }
 
-inline int xQueueSendFromISR(QueueHandle_t q, const void* p, int * w) {
+inline int xQueueSendFromISR(QueueHandle_t q, const void* p, int* w) {
     int result = xQueueSend(q, p, 0);
-    if (result) * w = 1;
+    if (result)
+        *w = 1;
     return result;
 }
 
-inline int xQueueReceiveFromISR(QueueHandle_t q, void* p, int * w) {
+inline int xQueueReceiveFromISR(QueueHandle_t q, void* p, int* w) {
     int result = xQueueReceive(q, p, 0);
-    if (result) * w = 1;
+    if (result)
+        *w = 1;
     return result;
 }
 

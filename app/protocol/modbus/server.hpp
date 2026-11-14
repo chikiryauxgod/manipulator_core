@@ -10,13 +10,13 @@ namespace manipulator::modbus {
 class Server final {
 public:
 
-    explicit Server(Registers& registers):registers_(registers) {
+    explicit Server(Registers& registers) : registers_(registers) {
     }
 
     Server(const Server&) = delete;
     Server& operator=(const Server&) = delete;
-    nmbs_error initialize(uint8_t address, ByteStream& stream)
-    {
+
+    nmbs_error initialize(uint8_t address, ByteStream& stream) {
         nmbs_platform_conf platform;
         nmbs_platform_conf_create(&platform);
         platform.transport = NMBS_TRANSPORT_RTU;
@@ -40,11 +40,13 @@ public:
         nmbs_callbacks callbacks;
         nmbs_callbacks_create(&callbacks);
         callbacks.arg = &registers_;
-        callbacks.read_holding_registers = [](uint16_t a, uint16_t n, uint16_t* out, uint8_t, void* p) {
+        callbacks.read_holding_registers = [](uint16_t a, uint16_t n, uint16_t* out, uint8_t,
+                                              void* p) {
             return static_cast<nmbs_error>(static_cast<Registers*>(p)->read_holding(a, n, out));
         };
 
-        callbacks.read_input_registers = [](uint16_t a, uint16_t n, uint16_t* out, uint8_t, void* p) {
+        callbacks.read_input_registers = [](uint16_t a, uint16_t n, uint16_t* out, uint8_t,
+                                            void* p) {
             return static_cast<nmbs_error>(static_cast<Registers*>(p)->read_input(a, n, out));
         };
 
@@ -52,7 +54,8 @@ public:
             return static_cast<nmbs_error>(static_cast<Registers*>(p)->write_holding(a, 1, &v));
         };
 
-        callbacks.write_multiple_registers = [](uint16_t a, uint16_t n, const uint16_t* v, uint8_t, void* p) {
+        callbacks.write_multiple_registers = [](uint16_t a, uint16_t n, const uint16_t* v, uint8_t,
+                                                void* p) {
             return static_cast<nmbs_error>(static_cast<Registers*>(p)->write_holding(a, n, v));
         };
 
@@ -62,7 +65,7 @@ public:
     }
 
     nmbs_error poll() {
-        return initialized_?nmbs_server_poll(&instance_):NMBS_ERROR_INVALID_ARGUMENT;
+        return initialized_ ? nmbs_server_poll(&instance_) : NMBS_ERROR_INVALID_ARGUMENT;
     }
 
     void timeouts(int32_t read_ms, int32_t byte_ms) {
@@ -77,4 +80,4 @@ private:
     bool initialized_ = false;
 };
 
-}
+} // namespace manipulator::modbus

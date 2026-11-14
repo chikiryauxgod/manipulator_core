@@ -32,4 +32,4 @@ private:
     TaskHandle_t target_;
 };
 
-}
+} // namespace rtos_layer

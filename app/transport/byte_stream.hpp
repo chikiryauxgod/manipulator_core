@@ -15,4 +15,4 @@ public:
     virtual void discard() = 0;
 };
 
-}
+} // namespace manipulator

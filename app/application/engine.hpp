@@ -134,4 +134,4 @@ private:
     std::size_t head_ = 0, count_ = 0, result_head_ = 0, result_count_ = 0;
 };
 
-}
+} // namespace manipulator

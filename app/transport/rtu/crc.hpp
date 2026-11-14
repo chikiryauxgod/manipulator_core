@@ -5,8 +5,7 @@
 
 namespace manipulator::rtu {
 
-inline uint16_t crc16(const uint8_t* bytes, std::size_t count)
-{
+inline uint16_t crc16(const uint8_t* bytes, std::size_t count) {
     uint16_t crc = 0xffff;
     for (std::size_t i = 0; i < count; ++i) {
         crc ^= bytes[i];
@@ -17,4 +16,4 @@ inline uint16_t crc16(const uint8_t* bytes, std::size_t count)
     return crc;
 }
 
-}
+} // namespace manipulator::rtu

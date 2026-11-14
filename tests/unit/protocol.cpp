@@ -1,21 +1,26 @@
 #include "protocol/modbus/registers.hpp"
 #include "application/engine.hpp"
 #include <cstdlib>
-#define CHECK(x) do { if(!(x)) std::abort(); } while(false)
+#define CHECK(x)                                                                                   \
+    do {                                                                                           \
+        if (!(x))                                                                                  \
+            std::abort();                                                                          \
+    } while (false)
 using namespace manipulator;
 using namespace manipulator::modbus;
+
 static void command(Registers& bank, Command c) {
     const auto word = static_cast<uint16_t>(c);
     CHECK(bank.write_holding(0, 1, &word) == Exception::none);
 }
 
 static void stage(Registers& bank) {
-    uint16_t words[model_words] {};
+    uint16_t words[model_words]{};
 
     words[0] = 3;
     for (unsigned i = 0; i < 3; ++i) {
         encode_float(0.1f, words + 1 + i * 16);
-        encode_float( - 3.14f, words + 9 + i * 16);
+        encode_float(-3.14f, words + 9 + i * 16);
         encode_float(3.14f, words + 11 + i * 16);
     }
 
@@ -31,7 +36,7 @@ static void stage(Registers& bank) {
 int main() {
     Engine engine;
     Registers bank(engine);
-    uint16_t word = 2, out[24] {};
+    uint16_t word = 2, out[24]{};
 
     CHECK(bank.write_holding(0, 1, &word) == Exception::value);
     // incomplete
@@ -48,7 +53,7 @@ int main() {
     engine.complete(work, status, {});
     CHECK(engine.snapshot().runtime);
     CHECK(bank.write_holding(model_address, 1, &word) == Exception::busy);
-    uint16_t request[request_words] {};
+    uint16_t request[request_words]{};
 
     encode_u32(0x12345678, request);
     encode_float(0.3f, request + 2);

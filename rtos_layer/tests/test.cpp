@@ -3,10 +3,15 @@
 #include <rtos_layer/notification.hpp>
 #include <cstdlib>
 // Checks remain active in Release builds.
-#define CHECK(x) do { if(!(x)) std::abort(); } while(false)
+#define CHECK(x)                                                                                   \
+    do {                                                                                           \
+        if (!(x))                                                                                  \
+            std::abort();                                                                          \
+    } while (false)
+
 int main() {
     using namespace rtos_layer;
-    static_assert(!std::is_copy_constructible_v<StaticQueue<int, 2 >> );
+    static_assert(!std::is_copy_constructible_v<StaticQueue<int, 2>>);
     static_assert(!std::is_move_constructible_v<StaticMutex>);
     StaticQueue<int, 2> q;
     int out = 99;
@@ -28,7 +33,8 @@ int main() {
     {
         MutexGuard guard(mutex, 5);
         CHECK(guard.owns_lock() && last_timeout == 5);
-        { MutexGuard failed(mutex, 9);
+        {
+            MutexGuard failed(mutex, 9);
             CHECK(!failed.owns_lock());
         }
 

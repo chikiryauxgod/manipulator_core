@@ -25,4 +25,4 @@ public:
     virtual Snapshot snapshot() = 0;
 };
 
-}
+} // namespace manipulator

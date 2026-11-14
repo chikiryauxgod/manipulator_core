@@ -14,4 +14,4 @@ struct IkDefaults {
     static constexpr float max_step = 0.2f;
 };
 
-}
+} // namespace manipulator

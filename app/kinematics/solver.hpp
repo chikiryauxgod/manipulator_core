@@ -14,6 +14,7 @@ struct Configuration {
     std::array<k_dh_joint, max_joints> geometry{};
     std::array<k_joint_limits, max_joints> limits{};
     k_transform base{}, tool{};
+
     Configuration() {
         k_transform_identity(&base);
         k_transform_identity(&tool);
@@ -42,6 +43,7 @@ public:
     // Invalid configuration never replaces the active model.
     k_status configure(const Configuration& configuration);
     Result solve(const Request& request);
+
 private:
 
     k_model model_{};
@@ -50,4 +52,4 @@ private:
     bool ready_ = false;
 };
 
-}
+} // namespace manipulator

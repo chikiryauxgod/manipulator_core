@@ -17,4 +17,4 @@ public:
     void set(bool on);
 };
 
-}
+} // namespace manipulator::stm32::drivers

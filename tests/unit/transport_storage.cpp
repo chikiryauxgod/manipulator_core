@@ -4,10 +4,13 @@
 
 #include <cstdlib>
 
-#define CHECK(x) do { if (!(x)) std::abort(); } while (false)
+#define CHECK(x)                                                                                   \
+    do {                                                                                           \
+        if (!(x))                                                                                  \
+            std::abort();                                                                          \
+    } while (false)
 
-int main()
-{
+int main() {
     const uint8_t query[] = {1, 3, 0, 0, 0, 10, 0xc5, 0xcd};
     CHECK(manipulator::rtu::crc16(query, sizeof(query)) == 0);
     CHECK(manipulator::rtu::crc16(query, sizeof(query) - 2) == 0xcdc5);
@@ -60,7 +63,8 @@ int main()
     // cause a previously valid prefix to be dispatched too early.
     manipulator::rtu::Framer guarded;
     guarded.character_duration(100);
-    for (unsigned i = 0; i < 4; ++i) guarded.byte(i, i * 100);
+    for (unsigned i = 0; i < 4; ++i)
+        guarded.byte(i, i * 100);
     guarded.silence(300 + 1750);
     CHECK(!guarded.pop(data, size));
     guarded.byte(4, 300 + 1740 + 100);

@@ -10,8 +10,7 @@ manipulator::stm32::drivers::Timer2* active = nullptr;
 
 namespace manipulator::stm32::drivers {
 
-bool Timer2::initialize(AlarmHandler handler, void* context, uint32_t priority)
-{
+bool Timer2::initialize(AlarmHandler handler, void* context, uint32_t priority) {
     if (active && active != this) {
         return false;
     }
@@ -46,20 +45,17 @@ bool Timer2::initialize(AlarmHandler handler, void* context, uint32_t priority)
     return true;
 }
 
-uint32_t Timer2::now() const
-{
+uint32_t Timer2::now() const {
     return TIM2->CNT;
 }
 
-void Timer2::arm_after(uint32_t microseconds)
-{
+void Timer2::arm_after(uint32_t microseconds) {
     TIM2->CCR1 = TIM2->CNT + microseconds;
     TIM2->SR = ~TIM_SR_CC1IF;
     TIM2->DIER |= TIM_DIER_CC1IE;
 }
 
-void Timer2::handle_interrupt()
-{
+void Timer2::handle_interrupt() {
     if ((TIM2->SR & TIM_SR_CC1IF) && (TIM2->DIER & TIM_DIER_CC1IE)) {
         TIM2->SR = ~TIM_SR_CC1IF;
         TIM2->DIER &= ~TIM_DIER_CC1IE;
@@ -69,10 +65,9 @@ void Timer2::handle_interrupt()
     }
 }
 
-}
+} // namespace manipulator::stm32::drivers
 
-extern "C" void TIM2_IRQHandler(void)
-{
+extern "C" void TIM2_IRQHandler(void) {
     if (active) {
         active->handle_interrupt();
     }

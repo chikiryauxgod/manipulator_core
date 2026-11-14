@@ -12,4 +12,4 @@ public:
     bool write(unsigned slot, const uint32_t* words, std::size_t count) override;
 };
 
-}
+} // namespace manipulator::stm32::drivers

@@ -25,4 +25,4 @@ private:
     void* context_ = nullptr;
 };
 
-}
+} // namespace manipulator::stm32::drivers

@@ -1,12 +1,15 @@
 #pragma once
 
 #include "FreeRTOS.h"
-struct StaticSemaphore_t { bool locked = false;
+
+struct StaticSemaphore_t {
+    bool locked = false;
 };
 
-using SemaphoreHandle_t = StaticSemaphore_t * ;
+using SemaphoreHandle_t = StaticSemaphore_t*;
 inline unsigned releases = 0;
-inline SemaphoreHandle_t xSemaphoreCreateMutexStatic(StaticSemaphore_t * s) {
+
+inline SemaphoreHandle_t xSemaphoreCreateMutexStatic(StaticSemaphore_t* s) {
     return s;
 }
 

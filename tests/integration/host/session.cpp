@@ -7,15 +7,18 @@
 #include <cstdlib>
 #include <vector>
 
-#define CHECK(x) do { if (!(x)) std::abort(); } while (false)
+#define CHECK(x)                                                                                   \
+    do {                                                                                           \
+        if (!(x))                                                                                  \
+            std::abort();                                                                          \
+    } while (false)
 
 using namespace manipulator;
 using namespace manipulator::modbus;
 
 namespace {
 
-uint16_t crc(const std::vector<uint8_t>& bytes)
-{
+uint16_t crc(const std::vector<uint8_t>& bytes) {
     uint16_t result = 0xffff;
     for (auto byte : bytes) {
         result ^= byte;
@@ -30,8 +33,7 @@ struct Wire : ByteStream {
     std::vector<uint8_t> input, output;
     std::size_t position = 0;
 
-    static int32_t read_callback(uint8_t* buffer, uint16_t count, int32_t, void* argument)
-    {
+    static int32_t read_callback(uint8_t* buffer, uint16_t count, int32_t, void* argument) {
         auto& wire = *static_cast<Wire*>(argument);
         const auto size = std::min<std::size_t>(count, wire.input.size() - wire.position);
         std::memcpy(buffer, wire.input.data() + wire.position, size);
@@ -39,30 +41,25 @@ struct Wire : ByteStream {
         return size;
     }
 
-    static int32_t write_callback(const uint8_t* buffer, uint16_t count, int32_t, void* argument)
-    {
+    static int32_t write_callback(const uint8_t* buffer, uint16_t count, int32_t, void* argument) {
         auto& wire = *static_cast<Wire*>(argument);
         wire.output.insert(wire.output.end(), buffer, buffer + count);
         return count;
     }
 
-    int32_t read(uint8_t* data, uint16_t count, int32_t timeout) override
-    {
+    int32_t read(uint8_t* data, uint16_t count, int32_t timeout) override {
         return read_callback(data, count, timeout, this);
     }
 
-    int32_t write(const uint8_t* data, uint16_t count, int32_t timeout) override
-    {
+    int32_t write(const uint8_t* data, uint16_t count, int32_t timeout) override {
         return write_callback(data, count, timeout, this);
     }
 
-    void discard() override
-    {
+    void discard() override {
         position = input.size();
     }
 
-    void send(Server& server, std::vector<uint8_t> bytes)
-    {
+    void send(Server& server, std::vector<uint8_t> bytes) {
         const auto checksum = crc(bytes);
         bytes.push_back(checksum & 255);
         bytes.push_back(checksum >> 8);
@@ -74,16 +71,19 @@ struct Wire : ByteStream {
         CHECK(output[1] == input[1]); // no exception expected
     }
 
-    void command(Server& server, uint16_t value)
-    {
+    void command(Server& server, uint16_t value) {
         send(server, {1, 6, 0, 0, uint8_t(value >> 8), uint8_t(value)});
     }
 
-    void words(Server& server, uint16_t address, const uint16_t* words, uint16_t count)
-    {
+    void words(Server& server, uint16_t address, const uint16_t* words, uint16_t count) {
         CHECK(count <= 123);
-        std::vector<uint8_t> bytes{1, 16, uint8_t(address >> 8), uint8_t(address),
-                                  uint8_t(count >> 8), uint8_t(count), uint8_t(count * 2)};
+        std::vector<uint8_t> bytes{1,
+                                   16,
+                                   uint8_t(address >> 8),
+                                   uint8_t(address),
+                                   uint8_t(count >> 8),
+                                   uint8_t(count),
+                                   uint8_t(count * 2)};
         for (unsigned i = 0; i < count; ++i) {
             bytes.push_back(words[i] >> 8);
             bytes.push_back(words[i]);
@@ -92,10 +92,9 @@ struct Wire : ByteStream {
     }
 };
 
-}
+} // namespace
 
-int main()
-{
+int main() {
     Engine engine;
     Registers bank(engine);
     Server server(bank);

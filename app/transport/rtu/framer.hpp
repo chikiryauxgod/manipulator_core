@@ -16,11 +16,15 @@ public:
 
     // RXNE timestamps the END of a character, not its start. A one-character
     // guard prevents accepting a frame while a byte is still on the wire.
-    void character_duration(uint32_t microseconds) { character_us_ = microseconds; }
-    uint32_t completion_delay() const { return frame_gap_us + character_us_; }
+    void character_duration(uint32_t microseconds) {
+        character_us_ = microseconds;
+    }
 
-    void byte(uint8_t value, uint32_t now, bool error = false)
-    {
+    uint32_t completion_delay() const {
+        return frame_gap_us + character_us_;
+    }
+
+    void byte(uint8_t value, uint32_t now, bool error = false) {
         if (receiving_ && uint32_t(now - last_) >= completion_delay()) {
             finish();
         }
@@ -41,8 +45,7 @@ public:
     }
 
     // Return the remaining delay if a compare interrupt arrived before t3.5.
-    uint32_t silence(uint32_t now)
-    {
+    uint32_t silence(uint32_t now) {
         if (receiving_) {
             const uint32_t elapsed = now - last_;
             if (elapsed < completion_delay()) {
@@ -53,8 +56,7 @@ public:
         return 0;
     }
 
-    bool pop(uint8_t* output, uint16_t& size)
-    {
+    bool pop(uint8_t* output, uint16_t& size) {
         if (count_ == 0) {
             return false;
         }
@@ -69,12 +71,13 @@ public:
         return true;
     }
 
-    uint32_t dropped() const { return dropped_; }
+    uint32_t dropped() const {
+        return dropped_;
+    }
 
 private:
 
-    void finish()
-    {
+    void finish() {
         if (!invalid_ && length_ >= 4 && count_ < frames_.size()) {
             const auto tail = (head_ + count_) % frames_.size();
             frames_[tail] = current_;
@@ -97,4 +100,4 @@ private:
     bool receiving_ = false, invalid_ = false;
 };
 
-}
+} // namespace manipulator::rtu

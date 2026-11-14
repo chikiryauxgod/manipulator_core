@@ -15,7 +15,14 @@ constexpr uint16_t input_words = 24;
 
 enum class Exception : uint8_t { none = 0, address = 2, value = 3, failure = 4, busy = 4 };
 
-enum class Command : uint16_t { begin = 1, apply = 2, submit = 3, acknowledge = 4, save = 5, load = 6 };
+enum class Command : uint16_t {
+    begin = 1,
+    apply = 2,
+    submit = 3,
+    acknowledge = 4,
+    save = 5,
+    load = 6
+};
 
 class Registers final {
 public:
@@ -25,11 +32,15 @@ public:
     }
 
     bool restore();
-    const SavedConfiguration& settings() const { return saved_; }
+
+    const SavedConfiguration& settings() const {
+        return saved_;
+    }
 
     Exception read_holding(uint16_t address, uint16_t count, uint16_t* output) const;
     Exception write_holding(uint16_t address, uint16_t count, const uint16_t* input);
     Exception read_input(uint16_t address, uint16_t count, uint16_t* output);
+
 private:
 
     Exception execute(uint16_t command);
@@ -46,7 +57,7 @@ private:
 };
 
 inline uint32_t decode_u32(const uint16_t* words) {
-    return (uint32_t(words[0]) << 16)|words[1];
+    return (uint32_t(words[0]) << 16) | words[1];
 }
 
 inline float decode_float(const uint16_t* words) {
@@ -67,4 +78,4 @@ inline void encode_float(float value, uint16_t* words) {
     std::memcpy(&bits, &value, 4);
     encode_u32(bits, words);
 }
-}
+} // namespace manipulator::modbus

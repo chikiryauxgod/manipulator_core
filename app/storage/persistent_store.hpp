@@ -9,7 +9,8 @@ namespace manipulator {
 class PersistentConfigurationStore final : public ConfigurationStore {
 public:
 
-    explicit PersistentConfigurationStore(WordStorage& storage) : storage_(storage) {}
+    explicit PersistentConfigurationStore(WordStorage& storage) : storage_(storage) {
+    }
 
     bool load(SavedConfiguration&) override;
     bool save(const SavedConfiguration&) override;
@@ -20,4 +21,4 @@ private:
     WordStorage& storage_;
 };
 
-}
+} // namespace manipulator

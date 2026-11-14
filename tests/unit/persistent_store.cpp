@@ -5,7 +5,11 @@
 #include <cstdlib>
 #include <limits>
 
-#define CHECK(condition) do { if (!(condition)) std::abort(); } while (false)
+#define CHECK(condition)                                                                           \
+    do {                                                                                           \
+        if (!(condition))                                                                          \
+            std::abort();                                                                          \
+    } while (false)
 
 namespace {
 
@@ -16,15 +20,13 @@ using manipulator::SavedConfiguration;
 class MemorySlots final : public manipulator::WordStorage {
 public:
 
-    MemorySlots()
-    {
+    MemorySlots() {
         for (auto& bank : banks) {
             bank.fill(0xffffffffU);
         }
     }
 
-    bool read(unsigned slot, uint32_t* output, std::size_t count) const override
-    {
+    bool read(unsigned slot, uint32_t* output, std::size_t count) const override {
         if (static_cast<int>(slot) == unreadable) {
             return false;
         }
@@ -32,8 +34,7 @@ public:
         return true;
     }
 
-    bool write(unsigned slot, const uint32_t* data, std::size_t count) override
-    {
+    bool write(unsigned slot, const uint32_t* data, std::size_t count) override {
         ++writes;
         auto& bank = banks.at(slot);
         bank.fill(0xffffffffU);
@@ -55,10 +56,9 @@ public:
     bool corrupt_after_write = false;
 };
 
-}
+} // namespace
 
-int main()
-{
+int main() {
     SavedConfiguration original, updated, result;
     original.slave = 1;
     updated.slave = 7;

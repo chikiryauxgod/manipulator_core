@@ -4,7 +4,7 @@
 namespace manipulator {
 
 k_status Solver::configure(const Configuration& c) {
-    if (c.count < 3 || c.count>max_joints) {
+    if (c.count < 3 || c.count > max_joints) {
         return K_SIZE_MISMATCH;
     }
 
@@ -55,13 +55,15 @@ Result Solver::solve(const Request& request) {
     std::array<k_real, max_joints> scales{}, steps{};
     scales.fill(IkDefaults::joint_scale);
     steps.fill(IkDefaults::max_step);
-    const k_ik_options options{
-        IkDefaults::iterations, IkDefaults::backtracking, IkDefaults::tolerance,
-        IkDefaults::length_scale, IkDefaults::damping,
-        scales.data(), steps.data(), model_.joint_count
-    };
+    const k_ik_options options{IkDefaults::iterations, IkDefaults::backtracking,
+                               IkDefaults::tolerance,  IkDefaults::length_scale,
+                               IkDefaults::damping,    scales.data(),
+                               steps.data(),           model_.joint_count};
 
-    result.status = k_inverse_position(&model_, &request.target, request.initial.data(), model_.joint_count, &options, workspace_.data(), workspace_.size(), result.angles.data(), result.angles.size(), &result.report);
+    result.status =
+        k_inverse_position(&model_, &request.target, request.initial.data(), model_.joint_count,
+                           &options, workspace_.data(), workspace_.size(), result.angles.data(),
+                           result.angles.size(), &result.report);
     return result;
 }
-}
+} // namespace manipulator

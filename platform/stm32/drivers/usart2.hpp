@@ -47,4 +47,4 @@ private:
     volatile UartStatistics statistics_{};
 };
 
-}
+} // namespace manipulator::stm32::drivers

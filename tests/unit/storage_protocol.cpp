@@ -3,7 +3,11 @@
 
 #include <cstdlib>
 
-#define CHECK(x) do { if (!(x)) std::abort(); } while (false)
+#define CHECK(x)                                                                                   \
+    do {                                                                                           \
+        if (!(x))                                                                                  \
+            std::abort();                                                                          \
+    } while (false)
 
 using namespace manipulator;
 using namespace manipulator::modbus;
@@ -12,24 +16,23 @@ struct MemoryStore : ConfigurationStore {
     bool valid = false, fail = false;
     SavedConfiguration data;
 
-    bool load(SavedConfiguration& out) override
-    {
-        if (!valid) return false;
+    bool load(SavedConfiguration& out) override {
+        if (!valid)
+            return false;
         out = data;
         return true;
     }
 
-    bool save(const SavedConfiguration& value) override
-    {
-        if (fail) return false;
+    bool save(const SavedConfiguration& value) override {
+        if (fail)
+            return false;
         data = value;
         valid = true;
         return true;
     }
 };
 
-int main()
-{
+int main() {
     MemoryStore store;
     store.valid = true;
     store.data.model[0] = 3;

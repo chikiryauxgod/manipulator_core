@@ -2,8 +2,13 @@
 #include <manipulator/forward.h>
 #include <cmath>
 #include <cstdlib>
-#define CHECK(x) do { if(!(x)) std::abort(); } while(false)
+#define CHECK(x)                                                                                   \
+    do {                                                                                           \
+        if (!(x))                                                                                  \
+            std::abort();                                                                          \
+    } while (false)
 using namespace manipulator;
+
 static Configuration config() {
     Configuration c;
     c.count = 3;
@@ -13,7 +18,8 @@ static Configuration config() {
 
     c.geometry[2] = {K_REVOLUTE, 0.2f, 0, 0, 0};
 
-    for (auto& limit:c.limits) limit = {K_BOUNDED, - 3.14159265f, 3.14159265f};
+    for (auto& limit : c.limits)
+        limit = {K_BOUNDED, -3.14159265f, 3.14159265f};
 
     return c;
 }
@@ -35,7 +41,8 @@ int main() {
     }
 
     CHECK(controller.submit(request) == Controller::Admission::full);
-    for (unsigned i = 0; i < 8; ++i) CHECK(controller.process_one());
+    for (unsigned i = 0; i < 8; ++i)
+        CHECK(controller.process_one());
     request.id = 99;
     CHECK(controller.submit(request) == Controller::Admission::accepted);
     CHECK(!controller.process_one());
@@ -45,7 +52,7 @@ int main() {
     CHECK(result.report.residual_valid && result.report.residual <= 2e-5f);
     // Independently verify returned joint coordinates through forward kinematics.
     k_model model{};
-    k_joint_config storage[6] {};
+    k_joint_config storage[6]{};
 
     CHECK(k_model_begin(&model, storage, 6, 3) == K_OK);
     for (unsigned i = 0; i < 3; ++i) {

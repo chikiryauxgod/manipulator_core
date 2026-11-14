@@ -17,41 +17,31 @@ public:
     }
 
     ServiceStatus begin_configuration() override {
-        auto status = locked([&] {
-            return engine_.begin_configuration();
-        });
+        auto status = locked([&] { return engine_.begin_configuration(); });
         wake();
         return status;
     }
 
     ServiceStatus activate(const Configuration& c) override {
-        auto status = locked([&] {
-            return engine_.activate(c);
-        });
+        auto status = locked([&] { return engine_.activate(c); });
         wake();
         return status;
     }
 
     ServiceStatus submit(const Request& r) override {
-        auto status = locked([&] {
-            return engine_.submit(r);
-        });
+        auto status = locked([&] { return engine_.submit(r); });
         wake();
         return status;
     }
 
     ServiceStatus acknowledge(uint32_t id) override {
-        auto status = locked([&] {
-            return engine_.acknowledge(id);
-        });
+        auto status = locked([&] { return engine_.acknowledge(id); });
         wake();
         return status;
     }
 
     Snapshot snapshot() override {
-        return locked([&] {
-            return engine_.snapshot();
-        });
+        return locked([&] { return engine_.snapshot(); });
     }
 
     // Task entry argument points to this object. The caller creates static tasks.
@@ -59,9 +49,7 @@ public:
         auto& self = *static_cast<RtosService*>(argument);
         for (;;) {
             Engine::Work work;
-            while (self.locked([&] {
-                return self.engine_.take_work(work);
-            })) {
+            while (self.locked([&] { return self.engine_.take_work(work); })) {
                 Result result{};
                 k_status status = K_NOT_READY;
                 if (work.configuration) {
@@ -83,7 +71,7 @@ public:
 
 private:
 
-    template<class F> auto locked(F action) -> decltype(action()) {
+    template <class F> auto locked(F action) -> decltype(action()) {
         rtos_layer::MutexGuard guard(mutex_, portMAX_DELAY);
         configASSERT(guard.owns_lock());
         return action();
@@ -101,4 +89,4 @@ private:
     TaskHandle_t worker_ = nullptr;
 };
 
-}
+} // namespace manipulator

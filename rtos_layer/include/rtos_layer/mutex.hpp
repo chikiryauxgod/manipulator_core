@@ -39,7 +39,7 @@ class MutexGuard final {
 public:
 
     explicit MutexGuard(StaticMutex& mutex, TickType_t timeout) noexcept
-    : mutex_(mutex), owned_(mutex.lock(timeout)) {
+        : mutex_(mutex), owned_(mutex.lock(timeout)) {
     }
 
     ~MutexGuard() {
@@ -63,4 +63,4 @@ private:
     bool owned_;
 };
 
-}
+} // namespace rtos_layer

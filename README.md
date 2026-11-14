@@ -1,6 +1,10 @@
 # Manipulator Core
 
-Прошивка для Black Pill на STM32F401CCU6: рассчитывает углы суставов по заданной точке TCP и принимает команды по Modbus RTU. Приложение написано на C++17, работает под FreeRTOS и поддерживает настройку модели из 3–6 суставов. Для проверки на ПК есть CMake-сборка, тесты и примеры.
+[![CI](https://github.com/chikiryauxgod/manipulator_core/actions/workflows/host.yml/badge.svg)](https://github.com/chikiryauxgod/manipulator_core/actions/workflows/host.yml)
+
+Прошивка для Black Pill на STM32F401CCU6: рассчитывает углы суставов по заданной точке TCP и
+принимает команды по Modbus RTU. Приложение написано на C++17, работает под FreeRTOS и поддерживает
+настройку модели из 3–6 суставов. Для проверки на ПК есть CMake-сборка, тесты и примеры.
 
 ## Оглавление
 
@@ -14,3 +18,5 @@
 - [Тесты](tests/README.md)
 - [Протокол и устройство проекта](docs/README.md)
 - [Зависимости](third-party/README.md)
+
+[Библиотека кинематики](https://github.com/chikiryauxgod/manipulator_kinematics)

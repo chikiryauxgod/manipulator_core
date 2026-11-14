@@ -4,8 +4,7 @@
 #include "stm32/drivers/board_io.hpp"
 #include "stm32/drivers/usart2.hpp"
 
-[[noreturn]] void uart_echo_run()
-{
+[[noreturn]] void uart_echo_run() {
     using namespace manipulator::stm32::drivers;
 
     StatusLed led;

@@ -50,7 +50,8 @@ public:
             return false;
         }
 
-        results_[(result_head_ + result_count_) % capacity] = solver_.solve(requests_[request_head_]);
+        results_[(result_head_ + result_count_) % capacity] =
+            solver_.solve(requests_[request_head_]);
         ++result_count_;
         request_head_ = (request_head_ + 1) % capacity;
         --request_count_;
@@ -82,6 +83,7 @@ public:
     }
 
     static constexpr std::size_t capacity = 8;
+
 private:
 
     Solver solver_;
@@ -91,4 +93,4 @@ private:
     std::size_t request_head_ = 0, request_count_ = 0, result_head_ = 0, result_count_ = 0;
 };
 
-}
+} // namespace manipulator

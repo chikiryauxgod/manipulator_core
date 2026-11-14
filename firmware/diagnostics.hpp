@@ -4,8 +4,7 @@
 #include "stm32/drivers/usart2.hpp"
 
 // Diagnostics are composed here; drivers never depend on the firmware globals.
-inline void publish_uart_statistics(const manipulator::stm32::drivers::UartStatistics& stats)
-{
+inline void publish_uart_statistics(const manipulator::stm32::drivers::UartStatistics& stats) {
     firmware_diagnostics.uart_irq_count = stats.interrupts;
     firmware_diagnostics.uart_rx_bytes = stats.received;
     firmware_diagnostics.uart_error_count = stats.errors;

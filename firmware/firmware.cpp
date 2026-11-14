@@ -24,11 +24,9 @@ StackType_t protocol_stack[protocol_stack_words];
 TaskHandle_t worker_handle = nullptr;
 
 // Construct after HAL_Init(), without heap or global RTOS constructors.
-alignas(manipulator::RtosService)
-unsigned char service_storage[sizeof(manipulator::RtosService)];
+alignas(manipulator::RtosService) unsigned char service_storage[sizeof(manipulator::RtosService)];
 
-void protocol_entry(void* argument)
-{
+void protocol_entry(void* argument) {
     auto& service = *static_cast<manipulator::RtosService*>(argument);
     // Static storage keeps frame queues and the flash codec off the task stack.
     static manipulator::stm32::drivers::ConfigurationFlash flash;
@@ -62,23 +60,18 @@ void protocol_entry(void* argument)
         ++firmware_diagnostics.protocol_heartbeat;
         firmware_diagnostics.scheduler_tick = xTaskGetTickCount();
         firmware_diagnostics.hal_tick = manipulator::stm32::drivers::milliseconds();
-        firmware_diagnostics.worker_stack_free_min =
-            uxTaskGetStackHighWaterMark(worker_handle);
-        firmware_diagnostics.protocol_stack_free_min =
-            uxTaskGetStackHighWaterMark(nullptr);
-
-
+        firmware_diagnostics.worker_stack_free_min = uxTaskGetStackHighWaterMark(worker_handle);
+        firmware_diagnostics.protocol_stack_free_min = uxTaskGetStackHighWaterMark(nullptr);
     }
 }
 
-}
+} // namespace
 
 extern "C" {
 
 volatile FirmwareDiagnostics firmware_diagnostics = {};
 
-void firmware_assert_failed(const char* file, uint32_t line)
-{
+void firmware_assert_failed(const char* file, uint32_t line) {
     manipulator::stm32::drivers::disable_interrupts();
     firmware_diagnostics.fault_file = file;
     firmware_diagnostics.fault_line = line;
@@ -88,16 +81,13 @@ void firmware_assert_failed(const char* file, uint32_t line)
     }
 }
 
-void vApplicationStackOverflowHook(TaskHandle_t task, char* task_name)
-{
+void vApplicationStackOverflowHook(TaskHandle_t task, char* task_name) {
     (void)task;
     firmware_assert_failed(task_name, 0);
 }
 
-void vApplicationGetIdleTaskMemory(StaticTask_t** task,
-                                 StackType_t** stack,
-                                 configSTACK_DEPTH_TYPE* depth)
-{
+void vApplicationGetIdleTaskMemory(StaticTask_t** task, StackType_t** stack,
+                                   configSTACK_DEPTH_TYPE* depth) {
     static StaticTask_t idle_control;
     static StackType_t idle_stack[configMINIMAL_STACK_SIZE];
 
@@ -106,27 +96,24 @@ void vApplicationGetIdleTaskMemory(StaticTask_t** task,
     *depth = configMINIMAL_STACK_SIZE;
 }
 
-void firmware_start(void)
-{
+void firmware_start(void) {
     if (FIRMWARE_UART_ECHO) {
         uart_echo_run();
     }
 
     auto* service = new (service_storage) manipulator::RtosService;
 
-    worker_handle = xTaskCreateStatic(
-        manipulator::RtosService::worker_entry, "kinematics",
-        worker_stack_words, service, 1, worker_stack, &worker_control);
+    worker_handle =
+        xTaskCreateStatic(manipulator::RtosService::worker_entry, "kinematics", worker_stack_words,
+                          service, 1, worker_stack, &worker_control);
     configASSERT(worker_handle != nullptr);
     service->bind_worker(worker_handle);
 
-    const auto protocol_handle = xTaskCreateStatic(
-        protocol_entry, "protocol", protocol_stack_words,
-        service, 2, protocol_stack, &protocol_control);
+    const auto protocol_handle = xTaskCreateStatic(protocol_entry, "protocol", protocol_stack_words,
+                                                   service, 2, protocol_stack, &protocol_control);
     configASSERT(protocol_handle != nullptr);
 
     vTaskStartScheduler();
     firmware_assert_failed(__FILE__, __LINE__);
 }
-
 }

@@ -15,4 +15,4 @@ public:
     virtual bool write(unsigned slot, const uint32_t* words, std::size_t count) = 0;
 };
 
-}
+} // namespace manipulator
